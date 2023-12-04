@@ -5,7 +5,8 @@ const transactionSchema = new mongoose.Schema({
     from: String,
     to: String,
     value: String,
-    timestamp: Date,
+    address : String,
+    timestamp: String,
 }, { timestamps: true });
 
 const Transactions = mongoose.model("Transactions", transactionSchema);
