@@ -31,6 +31,8 @@ const fetchTransactionsFromAlchemy = async (address) => {
             category: ["external", "internal", "erc20", "erc721", "erc1155"],
         });
 
+        console.log(data,address)
+
         const transactionsToInsert = [];
 
         for (const element of data.transfers) {
@@ -51,7 +53,7 @@ const fetchTransactionsFromAlchemy = async (address) => {
 
             transactionsToInsert.push(transactionData);
         }
-        console.log(data.transfers.length)
+        console.log(data.transfers)
         await Transactions.insertMany(transactionsToInsert);
 
         console.log(`Inserted ${transactionsToInsert.length} transactions into MongoDB.`);
@@ -63,6 +65,7 @@ const fetchTransactionsFromAlchemy = async (address) => {
 
 exports.getTransactions = async (req, res) => {
     const address = req.params.address;
+    console.log(address,"address")
     const page = req.query.page || 1;
     const pageSize = 10;
     await fetchTransactionsFromAlchemy(address)

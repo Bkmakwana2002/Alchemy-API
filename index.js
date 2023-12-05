@@ -3,6 +3,7 @@ const app = express()
 const { Alchemy, Network } = require('alchemy-sdk')
 const connectDB = require('./db')
 const transaction_routes = require('./routes/transactions')
+const token_routes = require('./routes/token')
 
 const config = {
     apiKey: "CVLadiewE3TS80rHjQydiSyJsxVSIjV6",
@@ -31,6 +32,7 @@ const func = async()=>{
 //func()
 
 app.use('/api',transaction_routes)
+app.use('/api',token_routes)
 
 app.listen(process.env.PORT, () => {
     console.log(`server is running on ${process.env.PORT}`)
