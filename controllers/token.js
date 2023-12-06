@@ -1,38 +1,58 @@
 const { Alchemy, Network } = require('alchemy-sdk');
 const Tokens = require('../models/token');
 const TokensMetaData = require('../models/tokenMetaData');
-const NFT = require('../models/nft')
 
+// Alchemy configuration
 const config = {
     apiKey: process.env.API_KEY,
     network: Network.ETH_GOERLI,
 }
 
+// Create an instance of Alchemy with the provided configuration
 const alchemy = new Alchemy(config);
 
+/**
+ * Fetch token balances for a given address from Alchemy and update MongoDB.
+ * @function
+ * @async
+ * @param {string} address - Ethereum address to fetch token balances for.
+ * @returns {Promise<Object>} - Alchemy response containing token balances.
+ */
 const fetchTokenDetails = async (address) => {
     try {
-        const response = await alchemy.core.getTokenBalances(address)
-        let tokenDetail = await Tokens.findOneAndUpdate(
+        // Fetch token balances from Alchemy
+        const response = await alchemy.core.getTokenBalances(address);
+
+        // Update or insert token details into MongoDB
+        await Tokens.findOneAndUpdate(
             { address: address },
             { $set: { tokenBalances: response.tokenBalances } },
-            { upsert: true, new: true } 
+            { upsert: true, new: true }
         );
 
-        console.log(response)
-        return response
+        console.log(response);
+        return response;
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
 
+/**
+ * Get token details for a given Ethereum address.
+ * @function
+ * @async
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 exports.getTokenDetails = async (req, res) => {
     const address = req.params.address;
-    await fetchTokenDetails(address)
+    await fetchTokenDetails(address);
+
     try {
-        const tokenDetail = await Tokens.find({ address: address })
-        //console.log(tokenDetail)
+        // Retrieve token details from MongoDB for the specified address
+        const tokenDetail = await Tokens.find({ address: address });
+
         res.status(200).json(tokenDetail);
     } catch (error) {
         console.error(error);
@@ -40,60 +60,51 @@ exports.getTokenDetails = async (req, res) => {
     }
 };
 
+/**
+ * Fetch token metadata for a given address from Alchemy and update MongoDB.
+ * @function
+ * @async
+ * @param {string} address - Ethereum address to fetch token metadata for.
+ * @returns {Promise<Object>} - Alchemy response containing token metadata.
+ */
 const fetchTokenMetaData = async (address) => {
     try {
-        const response = await alchemy.core.getTokenMetadata(address)
-        let tokenMetaData = await TokensMetaData.findOneAndUpdate(
+        // Fetch token metadata from Alchemy
+        const response = await alchemy.core.getTokenMetadata(address);
+
+        // Update or insert token metadata into MongoDB
+        await TokensMetaData.findOneAndUpdate(
             { address: address },
-            { $set: { decimals: response.decimals , logo : response.logo, name : response.name, symbol : response.symbol } },
-            { upsert: true, new: true } 
+            { $set: { decimals: response.decimals, logo: response.logo, name: response.name, symbol: response.symbol } },
+            { upsert: true, new: true }
         );
 
-        console.log(response)
-        return response
+        console.log(response);
+        return response;
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
 
-exports.getTokenMetaData = async(req,res)=>{
+/**
+ * Get token metadata for a given Ethereum address.
+ * @function
+ * @async
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+exports.getTokenMetaData = async (req, res) => {
     const address = req.params.address;
-    await fetchTokenMetaData(address)
+    await fetchTokenMetaData(address);
+
     try {
-        const tokenDetail = await TokensMetaData.find({ address: address })
+        // Retrieve token metadata from MongoDB for the specified address
+        const tokenDetail = await TokensMetaData.find({ address: address });
+
         res.status(200).json(tokenDetail);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
-}
-
-const fetchNFT = async (address) => {
-    try {
-        const response = await alchemy.nft.getNftsForOwner(address)
-        let nft = await NFT.findOneAndUpdate(
-            { address: address },
-            { $set: { ownedNfts : response.ownedNfts , pageKey : response.pageKey, totalCount : response.totalCount , validAt : response.validAt } },
-            { upsert: true, new: true } 
-        );
-
-        console.log(nft)
-        return response
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
 };
-
-exports.getnft = async(req,res)=>{
-    const address = req.params.address;
-    await fetchNFT(address)
-    try {
-        const nftDetail = await NFT.find({ address: address })
-        res.status(200).json(nftDetail);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-}

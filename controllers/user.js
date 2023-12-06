@@ -1,114 +1,126 @@
-const generateToken = require('../generateToken')
-const User = require('../models/user')
-const crypto = require('crypto');
-const ethers = require('ethers');
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const generateToken = require("../generateToken");
+const crypto = require("crypto");
+const ethers = require("ethers");
 
+/**
+ * Register a new user.
+ * @function
+ * @async
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 exports.registerUser = async (req, res) => {
-    try {
+  try {
+    const { name, email, password } = req.body;
 
-        const { name, email, password } = req.body
-
-        let user = await User.findOne({ email })
-        if (user) {
-            return res.status(404).send({ success: false, message: 'User already exists' })
-        }
-
-        user = await User.create({
-            name,
-            email,
-            password
-        })
-        const token = await generateToken(user._id)
-
-        if (res.status(201)) {
-            res.json({
-                success: true,
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                token: token
-            })
-        }
-
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            message: error.message
-        })
+    // Check if the user already exists
+    let user = await User.findOne({ email });
+    if (user) {
+      return res
+        .status(404)
+        .send({ success: false, message: "User already exists" });
     }
-}
 
+    // Create a new user
+    user = await User.create({ name, email, password });
+
+    // Generate authentication token
+    const token = await generateToken(user._id);
+
+    // Respond with user details and token
+    res.json({
+      success: true,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: token,
+    });
+  } catch (error) {
+    // Handle registration error
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Authenticate a user.
+ * @function
+ * @async
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 exports.authUser = async (req, res) => {
-    try {
+  try {
+    const { email, password } = req.body;
 
-        const { email, password } = req.body
-        const user = await User.findOne({ email }).select('+password')
+    // Find the user by email and check the password
+    const user = await User.findOne({ email }).select("+password");
 
-        if (user && ((await user.matchPassword(password)))) {
-            res.status(201).send({
-                success: true,
-                name: user.name,
-                email: user.email,
-                token: generateToken(user._id),
-            })
-        }
-        else {
-            res.status(401);
-            throw new Error("Wrong Email or Password");
-        }
-
-
-    } catch (error) {
-
-        res.status(500).send({
-            success: false,
-            message: error.message,
-
-        })
-
+    if (user && (await user.matchPassword(password))) {
+      // Respond with user details and authentication token
+      res.status(201).send({
+        success: true,
+        name: user.name,
+        email: user.email,
+        token: generateToken(user._id),
+      });
+    } else {
+      // Respond with authentication failure
+      res.status(401);
+      throw new Error("Wrong Email or Password");
     }
-}
+  } catch (error) {
+    // Handle authentication error
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
+/**
+ * Get a nonce for Metamask authentication.
+ * @function
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 exports.getNonce = (req, res) => {
-    const nonce = crypto.randomBytes(32).toString('hex')
-    res.status(200).json({ nonce })
-}
+  const nonce = crypto.randomBytes(32).toString("hex");
+  res.status(200).json({ nonce });
+};
 
-exports.loginMetamask = async(req, res) => {
-    const { signedMessage, message, address } = req.body;
-    try {
-        const recoveredAddress = await ethers.utils.verifyMessage(message, signedMessage);
-        if (recoveredAddress !== address) {
-            return res.status(401).json({ error: 'Invalid signature' });
-        }
-        const token = await generateToken(address)
-        res.status(200).json({token});
-    } catch (error) {
-        res.send(error).status(500)
+/**
+ * Login with Metamask authentication.
+ * @function
+ * @async
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+exports.loginMetamask = async (req, res) => {
+  const { signedMessage, message, address } = req.body;
+  try {
+    // Verify the Metamask signature
+    const recoveredAddress = await ethers.utils.verifyMessage(
+      message,
+      signedMessage
+    );
+
+    if (recoveredAddress !== address) {
+      // Respond with invalid signature error
+      return res.status(401).json({ error: "Invalid signature" });
     }
-}
 
-exports.verifyMetamask = (req, res) => {
-    const authHeader = req.headers.authorization;
+    // Generate authentication token
+    const token = await generateToken(address);
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-        const decoded = jwt.verify(token,  process.env.AUTHORIZATION_SECRET_KEY);
-        console.log(decoded)
-        const currentTime = Math.floor(Date.now() / 1000);
-        // console.log(currentTime)
-        // if (decoded.exp < currentTime) {
-        //     res.json("tokenExpired");
-        // } else {
-        //     res.json("ok");
-        // }
-        res.json("ok")
-    } catch (err) {
-        res.status(401).json({ error: 'Invalid token' });
-    }
-}
+    // Respond with the authentication token
+    res.status(200).json({ token });
+  } catch (error) {
+    // Handle Metamask login error
+    res.send(error).status(500);
+  }
+};
