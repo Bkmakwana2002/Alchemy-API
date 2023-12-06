@@ -3,7 +3,7 @@ Backend APIs for accessing an address's transactions, tokens, and NFTs details.
 
 ## Technologies Used
 
-- **Backend**: The server is constructed using Node.js and the Express framework, ensuring robust and efficient functionality. MongoDB is employed as the database, and user authentication is handled via JSON Web Tokens (JWT) and signature verification using metamask and ethers.
+- **Backend**: The server is constructed using Node.js and the Express framework, ensuring robust and efficient functionality. MongoDB is employed as the database, and user authentication is handled via JSON Web Tokens (JWT) and signature verification using metamask and ethers. Also using express-rate-limit for protecting all APIs from DDOS attacks.
 
 ## Getting Started
 
