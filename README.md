@@ -13,11 +13,9 @@ To run this project locally and experience its capabilities, follow these simple
 
 2. Install the necessary dependencies using `pnpm install`.
 
-4. Create a `.env` file in the root folders. Copy the contents from `.env-sample` to these files, and fill in the essential API keys and URLs with your own credentials.
+4. Create a `.env` file in the root folders. Copy the contents from `.env-sample` to these files, and fill in the essential API keys and URLs with your credentials.
 
 5. Start the backend server with the command `node index.js`.
-
-Now, you are all set to explore the potential of Quaerere and enjoy a seamless web search experience.
 
 Feel free to customize, extend, and improve this project according to your needs. Happy searching!
 
