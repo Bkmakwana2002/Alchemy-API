@@ -3,7 +3,7 @@ const NFT = require('../models/nft')
 const NFTMetaData = require('../models/nftMetaData')
 
 const config = {
-    apiKey: "CVLadiewE3TS80rHjQydiSyJsxVSIjV6",
+    apiKey: process.env.API_KEY,
     network: Network.ETH_GOERLI,
 }
 
