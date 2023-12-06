@@ -1,9 +1,9 @@
 # Alchemy-API
-Backend APIs for accessing transactions , token and nft details of an address.
+Backend APIs for accessing an address's transactions, tokens, and NFTs details.
 
 ## Technologies Used
 
-- **Backend**: The server is constructed using Node.js and the Express framework, ensuring robust and efficient functionality. MongoDB is employed as the database, and user authentication is handled via JSON Web Tokens (JWT) and signature verification using metamask and etherjs.
+- **Backend**: The server is constructed using Node.js and the Express framework, ensuring robust and efficient functionality. MongoDB is employed as the database, and user authentication is handled via JSON Web Tokens (JWT) and signature verification using metamask and ethers.
 
 ## Getting Started
 
@@ -13,7 +13,7 @@ To run this project locally and experience its capabilities, follow these simple
 
 2. Install the necessary dependencies using `pnpm install`.
 
-4. Create an `.env` file in the root folders. Copy the contents from `.env-sample` to these files, and fill in the essential API keys and URLs with your own credentials.
+4. Create a `.env` file in the root folders. Copy the contents from `.env-sample` to these files, and fill in the essential API keys and URLs with your own credentials.
 
 5. Start the backend server with the command `node index.js`.
 
